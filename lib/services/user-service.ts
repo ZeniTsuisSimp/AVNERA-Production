@@ -69,7 +69,7 @@ export class UserProfileService {
     try {
       const { data, error } = await supabaseUserService
         .from('user_profiles')
-        .insert(profileData)
+        .insert(profileData as any)
         .select()
         .single();
 
@@ -95,7 +95,7 @@ export class UserProfileService {
     try {
       const { data, error } = await supabaseUser
         .from('user_profiles')
-        .update(updates)
+        .update(updates as Record<string, any>)
         .eq('id', userId)
         .select()
         .single();
@@ -230,7 +230,7 @@ export class UserAddressService {
 
       const { data, error } = await supabaseUser
         .from('user_addresses')
-        .insert(addressData)
+        .insert(addressData as any)
         .select()
         .single();
 
@@ -264,7 +264,7 @@ export class UserAddressService {
 
       const { data, error } = await supabaseUser
         .from('user_addresses')
-        .update(updates)
+        .update(updates as Record<string, any>)
         .eq('id', addressId)
         .select()
         .single();
@@ -323,7 +323,7 @@ export class UserAddressService {
     try {
       await supabaseUser
         .from('user_addresses')
-        .update({ is_default: false })
+        .update({ is_default: false } as Record<string, any>)
         .eq('user_id', userId)
         .eq('is_default', true);
     } catch (error) {

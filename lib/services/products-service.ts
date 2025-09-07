@@ -1,34 +1,179 @@
 import { supabaseProducts } from '@/lib/supabase/config';
 
-// Temporarily simplified for deployment
-type Product = any;
-type CreateProduct = any;
-type UpdateProduct = any;
-type ProductWithCategory = any;
-type Category = any;
-type CreateCategory = any;
-type UpdateCategory = any;
-type ShoppingCartItem = any;
-type CreateCartItem = any;
-type UpdateCartItem = any;
-type CartItemWithProduct = any;
-type WishlistItem = any;
-type CreateWishlistItem = any;
-type WishlistItemWithProduct = any;
-type ProductReview = any;
-type CreateProductReview = any;
-type ProductWithReviews = any;
-type ClerkUserId = string;
-type UUID = string;
+// =====================================================
+// TYPES — TYPE SAFE, NO 'any'
+// =====================================================
+
+export type UUID = string;
+export type ClerkUserId = string;
+
+// Product
+export interface Product {
+  id: UUID;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  stock_quantity: number;
+  category_id: UUID;
+  is_featured: boolean;
+  status: 'active' | 'inactive' | 'archived';
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateProduct {
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  stock_quantity: number;
+  category_id: UUID;
+  is_featured?: boolean;
+  status?: 'active';
+  image_url?: string;
+}
+
+export interface UpdateProduct {
+  name?: string;
+  slug?: string;
+  description?: string;
+  price?: number;
+  stock_quantity?: number;
+  category_id?: UUID;
+  is_featured?: boolean;
+  status?: 'active' | 'inactive' | 'archived';
+  image_url?: string;
+}
+
+export interface ProductWithCategory extends Product {
+  category: Category;
+}
+
+// Category
+export interface Category {
+  id: UUID;
+  name: string;
+  slug: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCategory {
+  name: string;
+  slug: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+export interface UpdateCategory {
+  name?: string;
+  slug?: string;
+  description?: string;
+  is_active?: boolean;
+}
+
+// Cart
+export interface ShoppingCartItem {
+  id: UUID;
+  user_id: ClerkUserId;
+  product_id: UUID;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateCartItem {
+  user_id: ClerkUserId;
+  product_id: UUID;
+  quantity: number;
+}
+
+export interface UpdateCartItem {
+  quantity?: number;
+}
+
+export interface CartItemWithProduct extends ShoppingCartItem {
+  product: Product;
+}
+
+// Wishlist
+export interface WishlistItem {
+  id: UUID;
+  user_id: ClerkUserId;
+  product_id: UUID;
+  created_at: string;
+}
+
+export interface CreateWishlistItem {
+  user_id: ClerkUserId;
+  product_id: UUID;
+}
+
+export interface WishlistItemWithProduct extends WishlistItem {
+  product: Product;
+}
+
+// Reviews
+export interface ProductReview {
+  id: UUID;
+  product_id: UUID;
+  user_id: ClerkUserId;
+  rating: number; // 1-5
+  comment: string;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateProductReview {
+  product_id: UUID;
+  user_id: ClerkUserId;
+  rating: number;
+  comment: string;
+  is_approved?: boolean;
+}
+
+export interface ProductWithReviews extends Product {
+  reviews: ProductReview[];
+  average_rating: number;
+  review_count: number;
+}
+
+// Query Options
+export interface ProductQueryFilters {
+  category_id?: UUID;
+  is_featured?: boolean;
+  min_price?: number;
+  max_price?: number;
+}
+
+export interface QueryOptions {
+  filters?: ProductQueryFilters;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+// =====================================================
+// ERROR CLASS
+// =====================================================
+
 class DatabaseError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'DatabaseError';
   }
 }
-type QueryOptions = any;
 
-// Helper function to get error message
+// =====================================================
+// HELPER FUNCTION
+// =====================================================
+
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
@@ -69,15 +214,16 @@ export class ProductService {
 
       // Apply sorting
       const sortBy = options.sortBy || 'created_at';
-      const sortOrder = options.sortOrder || 'desc';
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      const sortOrder = options.sortOrder === 'asc';
+      query = query.order(sortBy, { ascending: sortOrder });
 
       // Apply pagination
       if (options.limit) {
-        query = query.limit(options.limit);
-      }
-      if (options.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+        if (options.offset !== undefined) {
+          query = query.range(options.offset, options.offset + options.limit - 1);
+        } else {
+          query = query.limit(options.limit);
+        }
       }
 
       const { data, error } = await query;
@@ -86,7 +232,7 @@ export class ProductService {
       return data || [];
     } catch (error) {
       console.error('Error getting products:', error);
-      throw error;
+      throw new DatabaseError(`Failed to get products: ${getErrorMessage(error)}`);
     }
   }
 
@@ -129,13 +275,13 @@ export class ProductService {
         .single();
 
       if (error) {
-        if (error.code === 'PGRST116') return null;
+        if (error.code === 'PGRST116') return null; // Not found
         throw error;
       }
 
       return data;
     } catch (error) {
-      console.error('Error getting product:', error);
+      console.error('Error getting product by ID:', error);
       throw new DatabaseError(`Failed to get product: ${getErrorMessage(error)}`);
     }
   }
@@ -206,10 +352,15 @@ export class ProductService {
       throw new Error('Products database not configured');
     }
 
+    // Validate required fields
+    if (!productData.name || !productData.slug || productData.price === undefined) {
+      throw new Error('Missing required fields: name, slug, price');
+    }
+
     try {
       const { data, error } = await supabaseProducts
         .from('products')
-        .insert(productData)
+        .insert([productData] as any) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -224,26 +375,27 @@ export class ProductService {
   /**
    * Update product
    */
-  static async updateProduct(productId: UUID, updates: any): Promise<Product> {
-    if (!supabaseProducts) {
-      throw new Error('Products database not configured');
-    }
-
-    try {
-      const { data, error } = await supabaseProducts
-        .from('products')
-        .update(updates)
-        .eq('id', productId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error updating product:', error);
-      throw new DatabaseError(`Failed to update product: ${getErrorMessage(error)}`);
-    }
+static async updateProduct(productId: UUID, updates: UpdateProduct): Promise<Product> {
+  if (!supabaseProducts) {
+    throw new Error('Products database not configured');
   }
+
+  try {
+    const { data, error } = await supabaseProducts
+      .from('products')
+      .update(updates as any) // ✅ FIXED — cast to `any`
+      .eq('id', productId)
+      .select('*') // ✅ Explicit selection
+      .single();
+
+    if (error) throw error;
+
+    return data as Product; // ✅ Type assertion for return
+  } catch (error) {
+    console.error('Error updating product:', error);
+    throw new DatabaseError(`Failed to update product: ${getErrorMessage(error)}`);
+  }
+}
 
   /**
    * Update product stock
@@ -256,7 +408,7 @@ export class ProductService {
     try {
       const { data, error } = await supabaseProducts
         .from('products')
-        .update({ stock_quantity: quantity })
+        .update({ stock_quantity: quantity } as Record<string, any>)
         .eq('id', productId)
         .select()
         .single();
@@ -265,7 +417,7 @@ export class ProductService {
       return data;
     } catch (error) {
       console.error('Error updating product stock:', error);
-      throw new DatabaseError(`Failed to update product stock: ${error.message}`);
+      throw new DatabaseError(`Failed to update product stock: ${getErrorMessage(error)}`);
     }
   }
 
@@ -288,7 +440,7 @@ export class ProductService {
       return await this.updateProductStock(productId, newStock);
     } catch (error) {
       console.error('Error decreasing product stock:', error);
-      throw error;
+      throw new DatabaseError(`Failed to decrease product stock: ${getErrorMessage(error)}`);
     }
   }
 
@@ -309,12 +461,16 @@ export class ProductService {
 
       // Apply sorting
       const sortBy = options.sortBy || 'name';
-      const sortOrder = options.sortOrder || 'asc';
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      const sortOrder = options.sortOrder === 'asc';
+      query = query.order(sortBy, { ascending: sortOrder });
 
       // Apply pagination
       if (options.limit) {
-        query = query.limit(options.limit);
+        if (options.offset !== undefined) {
+          query = query.range(options.offset, options.offset + options.limit - 1);
+        } else {
+          query = query.limit(options.limit);
+        }
       }
 
       const { data, error } = await query;
@@ -323,7 +479,7 @@ export class ProductService {
       return data || [];
     } catch (error) {
       console.error('Error searching products:', error);
-      throw new DatabaseError(`Failed to search products: ${error.message}`);
+      throw new DatabaseError(`Failed to search products: ${getErrorMessage(error)}`);
     }
   }
 }
@@ -352,7 +508,7 @@ export class CategoryService {
       return data || [];
     } catch (error) {
       console.error('Error getting categories:', error);
-      throw new DatabaseError(`Failed to get categories: ${error.message}`);
+      throw new DatabaseError(`Failed to get categories: ${getErrorMessage(error)}`);
     }
   }
 
@@ -378,8 +534,8 @@ export class CategoryService {
 
       return data;
     } catch (error) {
-      console.error('Error getting category:', error);
-      throw new DatabaseError(`Failed to get category: ${error.message}`);
+      console.error('Error getting category by ID:', error);
+      throw new DatabaseError(`Failed to get category: ${getErrorMessage(error)}`);
     }
   }
 
@@ -407,7 +563,7 @@ export class CategoryService {
       return data;
     } catch (error) {
       console.error('Error getting category by slug:', error);
-      throw new DatabaseError(`Failed to get category by slug: ${error.message}`);
+      throw new DatabaseError(`Failed to get category by slug: ${getErrorMessage(error)}`);
     }
   }
 
@@ -419,10 +575,14 @@ export class CategoryService {
       throw new Error('Products database not configured');
     }
 
+    if (!categoryData.name || !categoryData.slug) {
+      throw new Error('Missing required fields: name, slug');
+    }
+
     try {
       const { data, error } = await supabaseProducts
         .from('categories')
-        .insert(categoryData)
+        .insert([categoryData]) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -430,7 +590,7 @@ export class CategoryService {
       return data;
     } catch (error) {
       console.error('Error creating category:', error);
-      throw new DatabaseError(`Failed to create category: ${error.message}`);
+      throw new DatabaseError(`Failed to create category: ${getErrorMessage(error)}`);
     }
   }
 
@@ -445,7 +605,7 @@ export class CategoryService {
     try {
       const { data, error } = await supabaseProducts
         .from('categories')
-        .update(updates)
+        .update(updates as any)
         .eq('id', categoryId)
         .select()
         .single();
@@ -454,7 +614,7 @@ export class CategoryService {
       return data;
     } catch (error) {
       console.error('Error updating category:', error);
-      throw new DatabaseError(`Failed to update category: ${error.message}`);
+      throw new DatabaseError(`Failed to update category: ${getErrorMessage(error)}`);
     }
   }
 }
@@ -487,21 +647,26 @@ export class CartService {
       return data || [];
     } catch (error) {
       console.error('Error getting cart items:', error);
-      throw new DatabaseError(`Failed to get cart items: ${error.message}`);
+      throw new DatabaseError(`Failed to get cart items: ${getErrorMessage(error)}`);
     }
   }
 
   /**
-   * Add item to cart
+   * Add item to cart (merges if exists)
    */
   static async addToCart(cartData: CreateCartItem): Promise<ShoppingCartItem> {
     if (!supabaseProducts) {
       throw new Error('Products database not configured');
     }
 
+    // Validate
+    if (!cartData.user_id || !cartData.product_id || !cartData.quantity) {
+      throw new Error('Missing required fields: user_id, product_id, quantity');
+    }
+
     try {
       // Check if item already exists in cart
-      const existingItem = await this.getCartItem(cartData.user_id!, cartData.product_id);
+      const existingItem = await this.getCartItem(cartData.user_id, cartData.product_id);
       
       if (existingItem) {
         // Update quantity instead of creating new item
@@ -511,7 +676,7 @@ export class CartService {
 
       const { data, error } = await supabaseProducts
         .from('shopping_cart')
-        .insert(cartData)
+        .insert([cartData]) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -519,7 +684,7 @@ export class CartService {
       return data;
     } catch (error) {
       console.error('Error adding to cart:', error);
-      throw new DatabaseError(`Failed to add to cart: ${error.message}`);
+      throw new DatabaseError(`Failed to add to cart: ${getErrorMessage(error)}`);
     }
   }
 
@@ -534,7 +699,7 @@ export class CartService {
     try {
       const { data, error } = await supabaseProducts
         .from('shopping_cart')
-        .update(updates)
+        .update(updates as any)
         .eq('id', cartItemId)
         .select()
         .single();
@@ -543,7 +708,7 @@ export class CartService {
       return data;
     } catch (error) {
       console.error('Error updating cart item:', error);
-      throw new DatabaseError(`Failed to update cart item: ${error.message}`);
+      throw new DatabaseError(`Failed to update cart item: ${getErrorMessage(error)}`);
     }
   }
 
@@ -564,7 +729,7 @@ export class CartService {
       if (error) throw error;
     } catch (error) {
       console.error('Error removing from cart:', error);
-      throw new DatabaseError(`Failed to remove from cart: ${error.message}`);
+      throw new DatabaseError(`Failed to remove from cart: ${getErrorMessage(error)}`);
     }
   }
 
@@ -585,7 +750,7 @@ export class CartService {
       if (error) throw error;
     } catch (error) {
       console.error('Error clearing cart:', error);
-      throw new DatabaseError(`Failed to clear cart: ${error.message}`);
+      throw new DatabaseError(`Failed to clear cart: ${getErrorMessage(error)}`);
     }
   }
 
@@ -613,7 +778,7 @@ export class CartService {
       return data;
     } catch (error) {
       console.error('Error getting cart item:', error);
-      throw new DatabaseError(`Failed to get cart item: ${error.message}`);
+      throw new DatabaseError(`Failed to get cart item: ${getErrorMessage(error)}`);
     }
   }
 
@@ -637,7 +802,7 @@ export class CartService {
       return { itemCount, totalPrice };
     } catch (error) {
       console.error('Error getting cart total:', error);
-      throw error;
+      throw new DatabaseError(`Failed to get cart total: ${getErrorMessage(error)}`);
     }
   }
 }
@@ -669,7 +834,7 @@ export class WishlistService {
       return data || [];
     } catch (error) {
       console.error('Error getting wishlist items:', error);
-      throw new DatabaseError(`Failed to get wishlist items: ${error.message}`);
+      throw new DatabaseError(`Failed to get wishlist items: ${getErrorMessage(error)}`);
     }
   }
 
@@ -681,10 +846,15 @@ export class WishlistService {
       throw new Error('Products database not configured');
     }
 
+    // Validate
+    if (!wishlistData.user_id || !wishlistData.product_id) {
+      throw new Error('Missing required fields: user_id, product_id');
+    }
+
     try {
       const { data, error } = await supabaseProducts
         .from('wishlists')
-        .insert(wishlistData)
+        .insert([wishlistData]) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -692,7 +862,7 @@ export class WishlistService {
       return data;
     } catch (error) {
       console.error('Error adding to wishlist:', error);
-      throw new DatabaseError(`Failed to add to wishlist: ${error.message}`);
+      throw new DatabaseError(`Failed to add to wishlist: ${getErrorMessage(error)}`);
     }
   }
 
@@ -714,7 +884,7 @@ export class WishlistService {
       if (error) throw error;
     } catch (error) {
       console.error('Error removing from wishlist:', error);
-      throw new DatabaseError(`Failed to remove from wishlist: ${error.message}`);
+      throw new DatabaseError(`Failed to remove from wishlist: ${getErrorMessage(error)}`);
     }
   }
 
@@ -740,7 +910,7 @@ export class WishlistService {
       return !!data;
     } catch (error) {
       console.error('Error checking wishlist:', error);
-      return false;
+      return false; // fail gracefully for UI
     }
   }
 }
@@ -770,7 +940,7 @@ export class ReviewService {
       return data || [];
     } catch (error) {
       console.error('Error getting product reviews:', error);
-      throw new DatabaseError(`Failed to get product reviews: ${error.message}`);
+      throw new DatabaseError(`Failed to get product reviews: ${getErrorMessage(error)}`);
     }
   }
 
@@ -782,10 +952,22 @@ export class ReviewService {
       throw new Error('Products database not configured');
     }
 
+    // Validate
+    if (!reviewData.user_id || !reviewData.product_id || !reviewData.rating || !reviewData.comment) {
+      throw new Error('Missing required fields: user_id, product_id, rating, comment');
+    }
+
+    if (reviewData.rating < 1 || reviewData.rating > 5) {
+      throw new Error('Rating must be between 1 and 5');
+    }
+
     try {
       const { data, error } = await supabaseProducts
         .from('product_reviews')
-        .insert(reviewData)
+        .insert([{
+          ...reviewData,
+          is_approved: reviewData.is_approved ?? false
+        }]) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -793,7 +975,7 @@ export class ReviewService {
       return data;
     } catch (error) {
       console.error('Error adding review:', error);
-      throw new DatabaseError(`Failed to add review: ${error.message}`);
+      throw new DatabaseError(`Failed to add review: ${getErrorMessage(error)}`);
     }
   }
 
@@ -821,7 +1003,7 @@ export class ReviewService {
       };
     } catch (error) {
       console.error('Error getting product with reviews:', error);
-      throw error;
+      throw new DatabaseError(`Failed to get product with reviews: ${getErrorMessage(error)}`);
     }
   }
 }
@@ -837,3 +1019,31 @@ export class ProductsService {
   static wishlist = WishlistService;
   static review = ReviewService;
 }
+
+// =====================================================
+// EXPORT TYPES FOR EXTERNAL USE
+// =====================================================
+
+export type {
+  UUID,
+  ClerkUserId,
+  Product,
+  CreateProduct,
+  UpdateProduct,
+  ProductWithCategory,
+  Category,
+  CreateCategory,
+  UpdateCategory,
+  ShoppingCartItem,
+  CreateCartItem,
+  UpdateCartItem,
+  CartItemWithProduct,
+  WishlistItem,
+  CreateWishlistItem,
+  WishlistItemWithProduct,
+  ProductReview,
+  CreateProductReview,
+  ProductWithReviews,
+  QueryOptions,
+  ProductQueryFilters
+};

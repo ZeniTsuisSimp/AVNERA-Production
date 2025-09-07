@@ -1,25 +1,27 @@
 import { supabaseOrders } from '@/lib/supabase/config';
+import {
+  Order,
+  CreateOrder,
+  UpdateOrder,
+  OrderItem,
+  CreateOrderItem,
+  Payment,
+  CreatePayment,
+  OrderWithItems,
+  ClerkUserId,
+  UUID,
+  OrderStatus,
+  PaymentStatus,
+  QueryOptions
+} from '../types/database';
 
-// Temporarily simplified for deployment
-type Order = any;
-type CreateOrder = any;
-type UpdateOrder = any;
-type OrderItem = any;
-type CreateOrderItem = any;
-type Payment = any;
-type CreatePayment = any;
-type OrderWithItems = any;
-type ClerkUserId = string;
-type UUID = string;
+// Keep DatabaseError local to this file
 class DatabaseError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'DatabaseError';
   }
 }
-type QueryOptions = any;
-type OrderStatus = string;
-type PaymentStatus = string;
 
 // Helper function to get error message
 function getErrorMessage(error: unknown): string {
@@ -168,7 +170,7 @@ export class OrderService {
     try {
       const { data, error } = await supabaseOrders
         .from('orders')
-        .insert(orderData)
+        .insert(orderData as any)
         .select()
         .single();
 
@@ -194,7 +196,7 @@ export class OrderService {
     try {
       const { data, error } = await supabaseOrders
         .from('orders')
-        .update({ status })
+        .update({ status } as any)
         .eq('id', orderId)
         .select()
         .single();
@@ -221,7 +223,7 @@ export class OrderService {
     try {
       const { data, error } = await supabaseOrders
         .from('orders')
-        .update(updates)
+        .update(updates as any)
         .eq('id', orderId)
         .select()
         .single();
@@ -281,7 +283,7 @@ export class OrderItemService {
     try {
       const { data, error } = await supabaseOrders
         .from('order_items')
-        .insert(items)
+        .insert(items as any)
         .select();
 
       if (error) throw error;
@@ -391,7 +393,7 @@ export class PaymentService {
     try {
       const { data, error } = await supabaseOrders
         .from('payments')
-        .insert(paymentData)
+        .insert(paymentData as any)
         .select()
         .single();
 
@@ -423,7 +425,7 @@ export class PaymentService {
 
       const { data, error } = await supabaseOrders
         .from('payments')
-        .update(updates)
+        .update(updates as any)
         .eq('id', paymentId)
         .select()
         .single();
