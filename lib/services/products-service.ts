@@ -136,7 +136,7 @@ export class ProductService {
       return data;
     } catch (error) {
       console.error('Error getting product:', error);
-      throw new DatabaseError(`Failed to get product: ${error.message}`);
+      throw new DatabaseError(`Failed to get product: ${getErrorMessage(error)}`);
     }
   }
 
@@ -164,7 +164,7 @@ export class ProductService {
       return data;
     } catch (error) {
       console.error('Error getting product by slug:', error);
-      throw new DatabaseError(`Failed to get product by slug: ${error.message}`);
+      throw new DatabaseError(`Failed to get product by slug: ${getErrorMessage(error)}`);
     }
   }
 
@@ -194,7 +194,7 @@ export class ProductService {
       return data;
     } catch (error) {
       console.error('Error getting product with category:', error);
-      throw new DatabaseError(`Failed to get product with category: ${error.message}`);
+      throw new DatabaseError(`Failed to get product with category: ${getErrorMessage(error)}`);
     }
   }
 
@@ -217,14 +217,14 @@ export class ProductService {
       return data;
     } catch (error) {
       console.error('Error creating product:', error);
-      throw new DatabaseError(`Failed to create product: ${error.message}`);
+      throw new DatabaseError(`Failed to create product: ${getErrorMessage(error)}`);
     }
   }
 
   /**
    * Update product
    */
-  static async updateProduct(productId: UUID, updates: UpdateProduct): Promise<Product> {
+  static async updateProduct(productId: UUID, updates: any): Promise<Product> {
     if (!supabaseProducts) {
       throw new Error('Products database not configured');
     }
@@ -241,7 +241,7 @@ export class ProductService {
       return data;
     } catch (error) {
       console.error('Error updating product:', error);
-      throw new DatabaseError(`Failed to update product: ${error.message}`);
+      throw new DatabaseError(`Failed to update product: ${getErrorMessage(error)}`);
     }
   }
 

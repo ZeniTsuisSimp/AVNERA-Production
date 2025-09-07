@@ -546,11 +546,11 @@ export class OrdersService {
       const orders = data || [];
       const summary = {
         total_orders: orders.length,
-        pending_orders: orders.filter(o => ['pending', 'confirmed'].includes(o.status)).length,
-        completed_orders: orders.filter(o => o.status === 'delivered').length,
+        pending_orders: orders.filter((o: any) => ['pending', 'confirmed'].includes(o.status)).length,
+        completed_orders: orders.filter((o: any) => o.status === 'delivered').length,
         total_spent: orders
-          .filter(o => o.status !== 'cancelled')
-          .reduce((sum, o) => sum + o.total_amount, 0)
+          .filter((o: any) => o.status !== 'cancelled')
+          .reduce((sum: number, o: any) => sum + o.total_amount, 0)
       };
 
       return summary;
