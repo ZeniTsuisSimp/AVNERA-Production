@@ -108,7 +108,7 @@ export class OrderService {
       return await this.getOrderById(order.id);
     } catch (error) {
       console.error('Error getting order by number:', error);
-      throw new DatabaseError(`Failed to get order by number: ${error.message}`);
+      throw new DatabaseError(`Failed to get order by number: ${getErrorMessage(error)}`);
     }
   }
 
@@ -153,7 +153,7 @@ export class OrderService {
       return data || [];
     } catch (error) {
       console.error('Error getting user orders:', error);
-      throw new DatabaseError(`Failed to get user orders: ${error.message}`);
+      throw new DatabaseError(`Failed to get user orders: ${getErrorMessage(error)}`);
     }
   }
 
@@ -176,7 +176,7 @@ export class OrderService {
       return data;
     } catch (error) {
       console.error('Error creating order:', error);
-      throw new DatabaseError(`Failed to create order: ${error.message}`);
+      throw new DatabaseError(`Failed to create order: ${getErrorMessage(error)}`);
     }
   }
 
@@ -203,7 +203,7 @@ export class OrderService {
       return data;
     } catch (error) {
       console.error('Error updating order status:', error);
-      throw new DatabaseError(`Failed to update order status: ${error.message}`);
+      throw new DatabaseError(`Failed to update order status: ${getErrorMessage(error)}`);
     }
   }
 
@@ -230,7 +230,7 @@ export class OrderService {
       return data;
     } catch (error) {
       console.error('Error updating order:', error);
-      throw new DatabaseError(`Failed to update order: ${error.message}`);
+      throw new DatabaseError(`Failed to update order: ${getErrorMessage(error)}`);
     }
   }
 
@@ -266,7 +266,7 @@ export class OrderItemService {
       return data || [];
     } catch (error) {
       console.error('Error getting order items:', error);
-      throw new DatabaseError(`Failed to get order items: ${error.message}`);
+      throw new DatabaseError(`Failed to get order items: ${getErrorMessage(error)}`);
     }
   }
 
@@ -288,7 +288,7 @@ export class OrderItemService {
       return data || [];
     } catch (error) {
       console.error('Error adding order items:', error);
-      throw new DatabaseError(`Failed to add order items: ${error.message}`);
+      throw new DatabaseError(`Failed to add order items: ${getErrorMessage(error)}`);
     }
   }
 
@@ -322,7 +322,7 @@ export class OrderItemService {
       return data;
     } catch (error) {
       console.error('Error updating order item:', error);
-      throw new DatabaseError(`Failed to update order item: ${error.message}`);
+      throw new DatabaseError(`Failed to update order item: ${getErrorMessage(error)}`);
     }
   }
 
@@ -343,7 +343,7 @@ export class OrderItemService {
       if (error) throw error;
     } catch (error) {
       console.error('Error removing order item:', error);
-      throw new DatabaseError(`Failed to remove order item: ${error.message}`);
+      throw new DatabaseError(`Failed to remove order item: ${getErrorMessage(error)}`);
     }
   }
 }
@@ -376,7 +376,7 @@ export class PaymentService {
       return data;
     } catch (error) {
       console.error('Error getting payment:', error);
-      throw new DatabaseError(`Failed to get payment: ${error.message}`);
+      throw new DatabaseError(`Failed to get payment: ${getErrorMessage(error)}`);
     }
   }
 
@@ -399,7 +399,7 @@ export class PaymentService {
       return data;
     } catch (error) {
       console.error('Error creating payment:', error);
-      throw new DatabaseError(`Failed to create payment: ${error.message}`);
+      throw new DatabaseError(`Failed to create payment: ${getErrorMessage(error)}`);
     }
   }
 
@@ -432,7 +432,7 @@ export class PaymentService {
       return data;
     } catch (error) {
       console.error('Error updating payment status:', error);
-      throw new DatabaseError(`Failed to update payment status: ${error.message}`);
+      throw new DatabaseError(`Failed to update payment status: ${getErrorMessage(error)}`);
     }
   }
 
@@ -459,7 +459,7 @@ export class PaymentService {
       return data;
     } catch (error) {
       console.error('Error getting payment by transaction ID:', error);
-      throw new DatabaseError(`Failed to get payment by transaction ID: ${error.message}`);
+      throw new DatabaseError(`Failed to get payment by transaction ID: ${getErrorMessage(error)}`);
     }
   }
 }
