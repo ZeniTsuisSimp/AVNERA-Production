@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="80" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E6C79C;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
+    </linearGradient>
+    <filter id="textShadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  
+  <!-- Decorative element - Mandala-inspired design -->
+  <g transform="translate(15,40)">
+    <circle cx="0" cy="0" r="25" fill="none" stroke="url(#goldGradient)" stroke-width="2" opacity="0.6"/>
+    <circle cx="0" cy="0" r="15" fill="none" stroke="url(#goldGradient)" stroke-width="1.5" opacity="0.4"/>
+    <path d="M-20,0 L-10,0 M10,0 L20,0 M0,-20 L0,-10 M0,10 L0,20" stroke="url(#goldGradient)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M-14,-14 L-7,-7 M7,7 L14,14 M14,-14 L7,-7 M-7,7 L-14,14" stroke="url(#goldGradient)" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="0" cy="0" r="5" fill="url(#goldGradient)" opacity="0.8"/>
+  </g>
+  
+  <!-- Brand name -->
+  <text x="70" y="35" font-family="serif" font-size="28" font-weight="bold" fill="url(#goldGradient)" filter="url(#textShadow)">Anvera</text>
+  
+  <!-- Tagline -->
+  <text x="70" y="55" font-family="serif" font-size="12" font-style="italic" fill="#6B5B73" opacity="0.8">Craft meets couture</text>
+  
+  <!-- Decorative underline -->
+  <path d="M70,45 L190,45" stroke="url(#goldGradient)" stroke-width="1" opacity="0.6"/>
+</svg>
