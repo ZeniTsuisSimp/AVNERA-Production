@@ -37,7 +37,7 @@ Email: ${user.emailAddresses?.[0]?.emailAddress}`
     // Create order
     const { data: order, error: orderError } = await ordersClient
       .from('orders')
-      .insert(orderData)
+      .insert(orderData as any)
       .select()
       .single();
 
@@ -59,11 +59,11 @@ Email: ${user.emailAddresses?.[0]?.emailAddress}`
       throw new Error('No products found to create order item');
     }
     
-    const product = products[0];
+    const product = products[0] as any;
     
     // Create sample order item with real product
     const orderItem = {
-      order_id: order.id,
+      order_id: (order as any).id,
       product_id: product.id,
       product_name: product.name,
       quantity: 1,
@@ -73,11 +73,11 @@ Email: ${user.emailAddresses?.[0]?.emailAddress}`
 
     const { error: itemError } = await ordersClient
       .from('order_items')
-      .insert(orderItem);
+      .insert(orderItem as any);
 
     if (itemError) {
       // Rollback order creation
-      await ordersClient.from('orders').delete().eq('id', order.id);
+      await ordersClient.from('orders').delete().eq('id', (order as any).id);
       throw new Error(`Failed to create order items: ${itemError.message}`);
     }
 
@@ -85,10 +85,10 @@ Email: ${user.emailAddresses?.[0]?.emailAddress}`
       success: true,
       message: 'Test order created successfully',
       data: {
-        order_id: order.id,
-        order_number: order.order_number,
-        total_amount: order.total_amount,
-        status: order.status
+        order_id: (order as any).id,
+        order_number: (order as any).order_number,
+        total_amount: (order as any).total_amount,
+        status: (order as any).status
       }
     });
 

@@ -618,40 +618,40 @@ const CartPage = () => {
             <div className="p-3">
               <p className="text-gray-800 text-xs font-medium mb-2">{error.message}</p>
               
-              {error.details && (
+              {(error.details && typeof error.details === 'object') ? (
                 <div className="space-y-1.5 text-xs">
-                  {error.details.available_stock !== undefined && (
+                  {(error.details as any).available_stock !== undefined && (
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Available:</span>
                       <span className="font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
-                        {error.details.available_stock}
+                        {(error.details as any).available_stock}
                       </span>
                     </div>
                   )}
                   
-                  {error.details.current_in_cart !== undefined && error.details.current_in_cart > 0 && (
+                  {(error.details as any).current_in_cart !== undefined && (error.details as any).current_in_cart > 0 && (
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">In Cart:</span>
                       <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
-                        {error.details.current_in_cart}
+                        {(error.details as any).current_in_cart}
                       </span>
                     </div>
                   )}
                   
-                  {error.details.max_can_add !== undefined && (
+                  {(error.details as any).max_can_add !== undefined && (
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Can Add:</span>
                       <span className={`font-semibold px-2 py-0.5 rounded ${
-                        error.details.max_can_add > 0 
+                        (error.details as any).max_can_add > 0 
                           ? 'text-green-700 bg-green-50' 
                           : 'text-red-700 bg-red-50'
                       }`}>
-                        {error.details.max_can_add > 0 ? error.details.max_can_add : '0'}
+                        {(error.details as any).max_can_add > 0 ? (error.details as any).max_can_add : '0'}
                       </span>
                     </div>
                   )}
                   
-                  {error.details.available_stock === 0 && (
+                  {(error.details as any).available_stock === 0 && (
                     <div className="mt-2 p-2 bg-red-50 rounded border border-red-100">
                       <p className="text-xs text-red-700 font-medium text-center">
                         🚫 Out of Stock
@@ -659,7 +659,7 @@ const CartPage = () => {
                     </div>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

@@ -7,8 +7,23 @@ import Header from '@/components/layout/Header';
 import ProductGrid from '@/components/ui/ProductGrid';
 import ProductFilters from '@/components/ui/ProductFilters';
 
+// Define the Product type
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  compareAtPrice?: number;
+  images: { url: string; altText: string }[];
+  category: { name: string; slug: string };
+  averageRating: number;
+  reviewCount: number;
+  variants: { id: string; color: string; size: string; price: number; stock: number }[];
+  tags: string[];
+};
+
 // Sample data - In a real app, this would come from your search API
-const sampleProducts = [
+const sampleProducts: Product[] = [
   {
     id: '1',
     name: 'Elegant Silk Saree',
@@ -65,7 +80,7 @@ const SearchPageContent = () => {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,9 +89,9 @@ const SearchPageContent = () => {
   const [searchQuery, setSearchQuery] = useState(query);
 
   const [filters, setFilters] = useState({
-    categories: [],
-    colors: [],
-    sizes: [],
+    categories: [] as string[],
+    colors: [] as string[],
+    sizes: [] as string[],
     priceMin: 0,
     priceMax: 10000,
     inStock: false,
@@ -169,9 +184,9 @@ const SearchPageContent = () => {
 
   const handleClearFilters = () => {
     setFilters({
-      categories: [],
-      colors: [],
-      sizes: [],
+      categories: [] as string[],
+      colors: [] as string[],
+      sizes: [] as string[],
       priceMin: priceRange.min,
       priceMax: priceRange.max,
       inStock: false,

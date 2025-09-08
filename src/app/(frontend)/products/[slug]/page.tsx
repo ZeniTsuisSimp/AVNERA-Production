@@ -188,18 +188,14 @@ const ProductDetailPage = () => {
     for (let i = 0; i < quantity; i++) {
       addToCart({
         id: `${product.id}-${selectedVariant.id}-${Date.now()}-${i}`,
-        productId: product.id,
-        variantId: selectedVariant.id,
         name: product.name,
         image: product.images[0]?.url || '/placeholder-product.jpg',
         price: selectedVariant.price || product.price,
-        compareAtPrice: product.compareAtPrice,
-        options: {
+        variant: {
           color: selectedVariant.color || '',
           size: selectedVariant.size || '',
         },
-        sku: product.slug,
-        inStock: selectedVariant.stock > 0,
+        maxQuantity: selectedVariant.stock,
       });
     }
     setQuantity(1);
@@ -211,12 +207,13 @@ const ProductDetailPage = () => {
     } else {
       addToWishlist({
         id: product.id,
-        productId: product.id,
         name: product.name,
         image: product.images[0]?.url || '/placeholder-product.jpg',
         price: product.price,
-        compareAtPrice: product.compareAtPrice,
+        originalPrice: product.compareAtPrice,
         slug: product.slug,
+        inStock: selectedVariant.stock > 0,
+        rating: product.averageRating,
       });
     }
   };
@@ -225,29 +222,18 @@ const ProductDetailPage = () => {
     setLoading(true);
     
     try {
-      // Add item to cart first
-      const cartItem = {
-        id: `${product.id}-${selectedVariant.id}-${Date.now()}`,
-        productId: product.id,
-        variantId: selectedVariant.id,
-        name: product.name,
-        image: product.images[0]?.url || '/placeholder-product.jpg',
-        price: selectedVariant.price || product.price,
-        compareAtPrice: product.compareAtPrice,
-        options: {
-          color: selectedVariant.color || '',
-          size: selectedVariant.size || '',
-        },
-        sku: product.slug,
-        inStock: selectedVariant.stock > 0,
-        quantity: quantity,
-      };
-
       // Add to cart
       for (let i = 0; i < quantity; i++) {
         addToCart({
-          ...cartItem,
-          id: `${cartItem.id}-${i}`,
+          id: `${product.id}-${selectedVariant.id}-${Date.now()}-${i}`,
+          name: product.name,
+          image: product.images[0]?.url || '/placeholder-product.jpg',
+          price: selectedVariant.price || product.price,
+          variant: {
+            color: selectedVariant.color || '',
+            size: selectedVariant.size || '',
+          },
+          maxQuantity: selectedVariant.stock,
         });
       }
 

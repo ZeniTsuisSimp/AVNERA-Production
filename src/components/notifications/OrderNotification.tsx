@@ -7,7 +7,7 @@ import { Package, X } from 'lucide-react';
 
 const OrderNotification = () => {
   const { user } = useUser();
-  const [recentOrders, setRecentOrders] = useState([]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [showNotification, setShowNotification] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +29,7 @@ const OrderNotification = () => {
           // Show notification if order was placed within last 24 hours and user hasn't dismissed it
           if (hoursSinceOrder < 24) {
             const dismissedNotifications = JSON.parse(localStorage.getItem('dismissedOrderNotifications') || '[]');
-            if (!dismissedNotifications.includes(latestOrder.id)) {
+            if (!dismissedNotifications.includes((latestOrder as any).id)) {
               setRecentOrders([latestOrder]);
               setShowNotification(true);
             }
@@ -48,7 +48,7 @@ const OrderNotification = () => {
   const dismissNotification = () => {
     if (recentOrders.length > 0) {
       const dismissedNotifications = JSON.parse(localStorage.getItem('dismissedOrderNotifications') || '[]');
-      dismissedNotifications.push(recentOrders[0].id);
+      dismissedNotifications.push((recentOrders[0] as any).id);
       localStorage.setItem('dismissedOrderNotifications', JSON.stringify(dismissedNotifications));
     }
     setShowNotification(false);
@@ -58,7 +58,7 @@ const OrderNotification = () => {
     return null;
   }
 
-  const order = recentOrders[0];
+  const order = recentOrders[0] as any;
 
   return (
     <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 mx-4 sm:mx-6 lg:mx-8">

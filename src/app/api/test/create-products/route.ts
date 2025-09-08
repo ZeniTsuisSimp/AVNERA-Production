@@ -12,7 +12,7 @@ export async function POST(): Promise<NextResponse> {
         name: 'Ethnic Wear',
         slug: 'ethnic-wear',
         is_active: true
-      })
+      } as any)
       .select()
       .single();
 
@@ -25,14 +25,14 @@ export async function POST(): Promise<NextResponse> {
     }
 
     // Use existing category if duplicate
-    let categoryId = category?.id;
+    let categoryId = (category as any)?.id;
     if (!categoryId) {
       const { data: existingCategory } = await productsClient
         .from('categories')
         .select('id')
         .eq('slug', 'ethnic-wear')
         .single();
-      categoryId = existingCategory?.id;
+      categoryId = (existingCategory as any)?.id;
     }
 
     // Sample products data - using actual schema fields
@@ -69,7 +69,7 @@ export async function POST(): Promise<NextResponse> {
     // Insert products
     const { data: products, error: productsError } = await productsClient
       .from('products')
-      .insert(sampleProducts)
+      .insert(sampleProducts as any)
       .select();
 
     if (productsError && productsError.code !== '23505') { // Ignore duplicate key error

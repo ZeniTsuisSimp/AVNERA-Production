@@ -79,10 +79,25 @@ const sampleCategories = [
   { id: '223e4567-e89b-12d3-a456-426614174005', name: 'Suits', slug: 'suits', count: 22 }
 ];
 
+// Define the Product type
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  compareAtPrice?: number;
+  images: { url: string; altText: string }[];
+  category: { name: string; slug: string };
+  averageRating: number;
+  reviewCount: number;
+  variants: { id: string; color: string; size: string; price: number; stock: number }[];
+  tags: string[];
+};
+
 const ProductsPageContent = () => {
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -91,9 +106,9 @@ const ProductsPageContent = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [filters, setFilters] = useState({
-    categories: [],
-    colors: [],
-    sizes: [],
+    categories: [] as string[],
+    colors: [] as string[],
+    sizes: [] as string[],
     priceMin: 0,
     priceMax: 10000,
     inStock: false,

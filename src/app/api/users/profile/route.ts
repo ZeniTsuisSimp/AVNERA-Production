@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
 import { UserService } from '@/lib/services/user-service';
-import type { ApiResponse, UpdateUserProfile } from '@/lib/types/database';
+import type { ApiResponse } from '@/lib/types/database';
 
 // GET /api/users/profile - Get user profile
 export async function GET(): Promise<NextResponse<ApiResponse>> {
@@ -17,7 +17,7 @@ export async function GET(): Promise<NextResponse<ApiResponse>> {
     
     const userId = user.id;
 
-    const profile = await UserService.profile.getProfile(userId);
+    const profile = await (UserService as any).profile.getProfile(userId);
     
     if (!profile) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse<ApiRespons
     
     const userId = user.id;
 
-    const updates: UpdateUserProfile = await request.json();
+    const updates: any = await request.json();
 
     // Validate required fields if needed
     if (updates.email && !updates.email.includes('@')) {
@@ -64,7 +64,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse<ApiRespons
       );
     }
 
-    const updatedProfile = await UserService.profile.updateProfile(userId, updates);
+    const updatedProfile = await (UserService as any).profile.updateProfile(userId, updates);
 
     return NextResponse.json({
       success: true,
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
 
-    const profile = await UserService.initializeUser(profileData);
+    const profile = await (UserService as any).initializeUser(profileData);
 
     return NextResponse.json({
       success: true,

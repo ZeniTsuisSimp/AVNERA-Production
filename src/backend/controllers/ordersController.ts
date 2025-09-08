@@ -32,7 +32,7 @@ export class OrdersController {
         offset: (page - 1) * limit,
         filters: status ? { status } : undefined,
         sortBy: 'created_at',
-        sortOrder: 'desc' as const
+        sortOrder: 'desc'
       };
 
       // Fetch user's orders from database
@@ -125,7 +125,7 @@ export class OrdersController {
         return { success: false, error: 'Products database not configured' };
       }
       
-      const { data: cartItems, error: cartError } = await supabaseProducts
+      const { data: cartItems, error: cartError } = await (supabaseProducts as any)
         .from('shopping_cart')
         .select(`
           *,
@@ -138,15 +138,15 @@ export class OrdersController {
       }
 
       // Check stock availability for all items
-      for (const cartItem of cartItems) {
-        if (cartItem.products.stock_quantity < cartItem.quantity) {
-          return { success: false, error: `Insufficient stock for ${cartItem.products.name}` };
+      for (const cartItem of cartItems as any[]) {
+        if ((cartItem as any).products.stock_quantity < (cartItem as any).quantity) {
+          return { success: false, error: `Insufficient stock for ${(cartItem as any).products.name}` };
         }
       }
 
       // Calculate totals
-      const subtotal = checkoutData.subtotal || cartItems.reduce((total, item) => {
-        return total + (item.quantity * item.products.price);
+      const subtotal = checkoutData.subtotal || cartItems.reduce((total: number, item: any) => {
+        return total + ((item as any).quantity * (item as any).products.price);
       }, 0);
       
       const totalAmount = checkoutData.total_amount || subtotal;
@@ -192,7 +192,7 @@ export class OrdersController {
       // Create order
       const { data: order, error: orderError } = await supabaseOrders
         .from('orders')
-        .insert(orderData)
+        .insert(orderData as any)
         .select()
         .single();
 
@@ -209,38 +209,38 @@ export class OrdersController {
       console.log('Order created successfully:', JSON.stringify(order, null, 2));
 
       // Create order items
-      const orderItems = cartItems.map(cartItem => ({
-        order_id: order.id,
-        product_id: cartItem.product_id,
-        product_name: cartItem.products.name,
-        quantity: cartItem.quantity,
-        unit_price: cartItem.products.price,
-        total_price: cartItem.quantity * cartItem.products.price
+      const orderItems = cartItems.map((cartItem: any) => ({
+        order_id: (order as any).id,
+        product_id: (cartItem as any).product_id,
+        product_name: (cartItem as any).products.name,
+        quantity: (cartItem as any).quantity,
+        unit_price: (cartItem as any).products.price,
+        total_price: (cartItem as any).quantity * (cartItem as any).products.price
       }));
 
       const { error: itemsError } = await supabaseOrders
         .from('order_items')
-        .insert(orderItems);
+        .insert(orderItems as any);
 
       if (itemsError) {
         // Rollback order creation if items creation fails
-        await supabaseOrders.from('orders').delete().eq('id', order.id);
+        await supabaseOrders.from('orders').delete().eq('id', (order as any).id);
         throw new Error(`Failed to create order items: ${itemsError.message}`);
       }
 
       // Update stock quantities for purchased items
-      for (const cartItem of cartItems) {
-        const newStockQuantity = cartItem.products.stock_quantity - cartItem.quantity;
-        await supabaseProducts
+      for (const cartItem of cartItems as any[]) {
+        const newStockQuantity = (cartItem as any).products.stock_quantity - (cartItem as any).quantity;
+        await (supabaseProducts as any)
           .from('products')
           .update({ stock_quantity: newStockQuantity })
-          .eq('id', cartItem.product_id);
+          .eq('id', (cartItem as any).product_id);
         
-        console.log(`Updated stock for ${cartItem.products.name}: ${cartItem.products.stock_quantity} -> ${newStockQuantity}`);
+        console.log(`Updated stock for ${(cartItem as any).products.name}: ${(cartItem as any).products.stock_quantity} -> ${newStockQuantity}`);
       }
 
       // Clear user's cart
-      await supabaseProducts
+      await (supabaseProducts as any)
         .from('shopping_cart')
         .delete()
         .eq('user_id', userId);

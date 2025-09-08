@@ -123,7 +123,7 @@ export async function POST(): Promise<NextResponse> {
 
       const { data, error } = await supabaseProducts
       .from('categories')
-      .insert(testCategory)
+      .insert(testCategory as any)
       .select()
       .single();
 
@@ -132,7 +132,7 @@ export async function POST(): Promise<NextResponse> {
       } else {
         testResults.writeTests.products.success = true;
         // Clean up - delete test category
-        await supabaseProducts.from('categories').delete().eq('id', data.id);
+        await supabaseProducts.from('categories').delete().eq('id', (data as any).id);
       }
     }
   } catch (error) {

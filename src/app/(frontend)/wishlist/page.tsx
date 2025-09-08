@@ -21,24 +21,18 @@ const WishlistPage = () => {
     }
   };
 
-  const handleAddToCart = (item: { productId: string; name: string; image: string; price: number; compareAtPrice?: number; slug: string }) => {
+  const handleAddToCart = (item: { id: string; name: string; image: string; price: number; originalPrice?: number; slug: string }) => {
     addToCart({
-      id: `${item.productId}-default-${Date.now()}`,
-      productId: item.productId,
-      variantId: undefined,
+      id: `${item.id}-default-${Date.now()}`,
       name: item.name,
       image: item.image,
       price: item.price,
-      compareAtPrice: item.compareAtPrice,
-      options: undefined,
-      sku: item.slug,
-      inStock: true, // Assume in stock for wishlist items
     });
   };
 
-  const handleMoveToCart = (item: { productId: string; name: string; image: string; price: number; compareAtPrice?: number; slug: string }) => {
+  const handleMoveToCart = (item: { id: string; name: string; image: string; price: number; originalPrice?: number; slug: string }) => {
     handleAddToCart(item);
-    removeItem(item.productId);
+    removeItem(item.id);
   };
 
   if (wishlistItems.length === 0) {
@@ -120,17 +114,17 @@ const WishlistPage = () => {
                 </Link>
                 
                 {/* Discount Badge */}
-                {item.compareAtPrice && (
+                {item.originalPrice && (
                   <div className="absolute top-2 left-2">
                     <span className="bg-red-500 text-white px-2 py-1 text-xs font-semibold rounded">
-                      -{Math.round(((item.compareAtPrice - item.price) / item.compareAtPrice) * 100)}%
+                      -{Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}%
                     </span>
                   </div>
                 )}
 
                 {/* Remove from Wishlist */}
                 <button
-                  onClick={() => removeItem(item.productId)}
+                  onClick={() => removeItem(item.id)}
                   className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-sm transition-colors group"
                 >
                   <Heart className="w-4 h-4 text-red-500 fill-current" />
@@ -150,9 +144,9 @@ const WishlistPage = () => {
                   <span className="text-lg font-bold text-charcoal">
                     {getCurrencySymbol()}{item.price}
                   </span>
-                  {item.compareAtPrice && (
+                  {item.originalPrice && (
                     <span className="text-sm text-gray-500 line-through">
-                      {getCurrencySymbol()}{item.compareAtPrice}
+                      {getCurrencySymbol()}{item.originalPrice}
                     </span>
                   )}
                 </div>
@@ -175,7 +169,7 @@ const WishlistPage = () => {
                       View Details
                     </Link>
                     <button
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.id)}
                       className="p-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:text-red-600 transition-colors"
                       title="Remove from Wishlist"
                     >

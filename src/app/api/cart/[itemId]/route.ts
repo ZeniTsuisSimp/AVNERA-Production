@@ -53,7 +53,7 @@ export async function PUT(
       );
     }
 
-    const product = cartItem.products;
+    const product = (cartItem as any).products;
     if (!product) {
       return NextResponse.json(
         { success: false, error: 'Product not found' },
@@ -63,7 +63,7 @@ export async function PUT(
 
     // Check stock availability
     if (quantity > product.stock_quantity) {
-      const maxCanAdd = Math.max(0, product.stock_quantity - cartItem.quantity);
+      const maxCanAdd = Math.max(0, product.stock_quantity - (cartItem as any).quantity);
       return NextResponse.json(
         { 
           success: false, 
@@ -72,7 +72,7 @@ export async function PUT(
             product_name: product.name,
             requested_quantity: quantity,
             available_stock: product.stock_quantity,
-            current_in_cart: cartItem.quantity,
+            current_in_cart: (cartItem as any).quantity,
             max_can_add: maxCanAdd
           }
         },
@@ -88,7 +88,7 @@ export async function PUT(
           details: {
             product_name: product.name,
             available_stock: 0,
-            current_in_cart: cartItem.quantity
+            current_in_cart: (cartItem as any).quantity
           }
         },
         { status: 400 }
@@ -101,7 +101,7 @@ export async function PUT(
       .update({ 
         quantity,
         updated_at: new Date().toISOString()
-      })
+      } as never)
       .eq('id', itemId)
       .eq('user_id', userId) // Ensure user can only update their own cart items
       .select()

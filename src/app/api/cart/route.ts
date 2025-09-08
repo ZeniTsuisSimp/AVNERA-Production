@@ -49,9 +49,9 @@ export async function GET(): Promise<NextResponse<ApiResponse>> {
     }
 
     const items = cartItems || [];
-    const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+    const itemCount = items.reduce((total, item) => total + (item as any).quantity, 0);
     const totalPrice = items.reduce((total, item) => {
-      return total + (item.quantity * (item.products?.price || 0));
+      return total + ((item as any).quantity * ((item as any).products?.price || 0));
     }, 0);
 
     return NextResponse.json({
@@ -185,19 +185,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
     
-    console.log('Product found:', product.name, 'Stock:', product.stock_quantity);
+    console.log('Product found:', (product as any).name, 'Stock:', (product as any).stock_quantity);
 
     // Check stock availability for new cart items
-    if (product.stock_quantity < quantity) {
-      console.log('Insufficient stock. Available:', product.stock_quantity, 'Requested:', quantity);
+    if ((product as any).stock_quantity < quantity) {
+      console.log('Insufficient stock. Available:', (product as any).stock_quantity, 'Requested:', quantity);
       return NextResponse.json(
         { 
           success: false, 
-          error: `Only ${product.stock_quantity} ${product.name} available in stock. Cannot add ${quantity} items.`,
+          error: `Only ${(product as any).stock_quantity} ${(product as any).name} available in stock. Cannot add ${quantity} items.`,
           details: {
-            product_name: product.name,
+            product_name: (product as any).name,
             requested_quantity: quantity,
-            available_stock: product.stock_quantity
+            available_stock: (product as any).stock_quantity
           }
         },
         { status: 400 }
@@ -205,14 +205,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     }
     
     // Check if product is out of stock
-    if (product.stock_quantity === 0) {
+    if ((product as any).stock_quantity === 0) {
       console.log('Product is out of stock');
       return NextResponse.json(
         { 
           success: false, 
-          error: `${product.name} is currently out of stock.`,
+          error: `${(product as any).name} is currently out of stock.`,
           details: {
-            product_name: product.name,
+            product_name: (product as any).name,
             available_stock: 0
           }
         },
@@ -236,21 +236,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     
     if (existingItem) {
       // Check if total quantity (existing + new) exceeds available stock
-      const totalQuantity = existingItem.quantity + quantity;
-      console.log(`Stock validation: Current in cart: ${existingItem.quantity}, Adding: ${quantity}, Total: ${totalQuantity}, Available: ${product.stock_quantity}`);
+      const totalQuantity = (existingItem as any).quantity + quantity;
+      console.log(`Stock validation: Current in cart: ${(existingItem as any).quantity}, Adding: ${quantity}, Total: ${totalQuantity}, Available: ${(product as any).stock_quantity}`);
       
-      if (totalQuantity > product.stock_quantity) {
+      if (totalQuantity > (product as any).stock_quantity) {
         console.log('Total quantity exceeds available stock');
         return NextResponse.json(
           { 
             success: false, 
-            error: `Cannot add ${quantity} more items. You already have ${existingItem.quantity} in cart. Only ${product.stock_quantity} available.`,
+            error: `Cannot add ${quantity} more items. You already have ${(existingItem as any).quantity} in cart. Only ${(product as any).stock_quantity} available.`,
             details: {
               requested_quantity: quantity,
-              current_in_cart: existingItem.quantity,
+              current_in_cart: (existingItem as any).quantity,
               total_requested: totalQuantity,
-              available_stock: product.stock_quantity,
-              max_can_add: product.stock_quantity - existingItem.quantity
+              available_stock: (product as any).stock_quantity,
+              max_can_add: (product as any).stock_quantity - (existingItem as any).quantity
             }
           },
           { status: 400 }
@@ -260,8 +260,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       // Update quantity
       const { data, error } = await supabaseProducts
         .from('shopping_cart')
-        .update({ quantity: totalQuantity })
-        .eq('id', existingItem.id)
+        .update({ quantity: totalQuantity } as never)
+        .eq('id', (existingItem as any).id)
         .select()
         .single();
       
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
           user_id: userId,
           product_id,
           quantity
-        })
+        } as any)
         .select()
         .single();
       

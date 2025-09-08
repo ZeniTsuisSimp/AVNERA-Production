@@ -94,19 +94,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
         // Also update local store for immediate UI feedback
         const availableVariant = product.variants?.find(v => v.stock > 0);
         addToCart({
-          id: `${product.id}-${availableVariant?.id || 'default'}-${Date.now()}`,
-          productId: product.id,
-          variantId: availableVariant?.id,
+          id: product.id,
           name: product.name,
           image: product.images[0]?.url || '/placeholder-product.jpg',
           price: availableVariant?.price || product.price,
-          compareAtPrice: product.compareAtPrice,
-          options: availableVariant ? {
+          variant: availableVariant ? {
+            id: availableVariant.id,
             color: availableVariant.color || '',
             size: availableVariant.size || '',
           } : undefined,
-          sku: product.slug,
-          inStock: (availableVariant?.stock || 0) > 0,
         });
         
         if (result.warning) {
@@ -344,16 +340,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </button>
             
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                window.location.href = `/products/${product.slug}`;
-              }}
+            <Link
+              href={`/products/${product.slug}`}
               className="p-3 bg-white/90 backdrop-blur-sm text-gray-600 hover:text-blue-600 hover:bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
               title="Quick view"
             >
               <Eye className="w-5 h-5" />
-            </button>
+            </Link>
           </div>
 
           {/* Out of Stock Overlay */}

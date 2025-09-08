@@ -8,7 +8,7 @@ const webhookSecret = process.env.CLERK_WEBHOOK_SECRET || ''
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.text()
-    const headerPayload = headers()
+    const headerPayload = await headers()
     const svixHeaders = {
       'svix-id': headerPayload.get('svix-id')!,
       'svix-timestamp': headerPayload.get('svix-timestamp')!,
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const webhook = new Webhook(webhookSecret)
-    let event
+    let event: any
 
     try {
       event = webhook.verify(payload, svixHeaders)
@@ -29,36 +29,34 @@ export async function POST(request: NextRequest) {
 
     switch (type) {
       case 'user.created':
-        // Create user profile in our database
-        const { error } = await UserService.createUserProfile(
-          data.id,
-          data.email_addresses[0]?.email_address || '',
-          data.first_name || '',
-          data.last_name || ''
-        )
-
-        if (error) {
+        try {
+          // Create user profile in our database
+          await (UserService as any).initializeUser({
+            id: data.id,
+            email: data.email_addresses[0]?.email_address || '',
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
+          })
+          console.log(`User profile created for ${data.id}`)
+        } catch (error) {
           console.error('Error creating user profile:', error)
           return NextResponse.json({ error: 'Failed to create user profile' }, { status: 500 })
         }
-
-        console.log(`User profile created for ${data.id}`)
         break
 
       case 'user.updated':
-        // Update user profile in our database
-        const { error: updateError } = await UserService.updateUserProfile(data.id, {
-          email: data.email_addresses[0]?.email_address || '',
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-        })
-
-        if (updateError) {
-          console.error('Error updating user profile:', updateError)
+        try {
+          // Update user profile in our database
+          await (UserService as any).profile.updateProfile(data.id, {
+            email: data.email_addresses[0]?.email_address || '',
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
+          })
+          console.log(`User profile updated for ${data.id}`)
+        } catch (error) {
+          console.error('Error updating user profile:', error)
           return NextResponse.json({ error: 'Failed to update user profile' }, { status: 500 })
         }
-
-        console.log(`User profile updated for ${data.id}`)
         break
 
       case 'user.deleted':

@@ -43,7 +43,7 @@ export class DatabaseService {
 
     try {
       if (supabaseOrders) {
-        await supabaseOrders.from('orders').select('id').limit(1);
+        await (supabaseOrders as any).from('orders').select('id').limit(1);
         status.orders = true;
       }
     } catch (error) {
@@ -52,7 +52,7 @@ export class DatabaseService {
 
     try {
       if (supabaseProducts) {
-        await supabaseProducts.from('products').select('id').limit(1);
+        await (supabaseProducts as any).from('products').select('id').limit(1);
         status.products = true;
       }
     } catch (error) {
@@ -61,7 +61,7 @@ export class DatabaseService {
 
     try {
       if (supabaseUser) {
-        await supabaseUser.from('user_profiles').select('id').limit(1);
+        await (supabaseUser as any).from('user_profiles').select('id').limit(1);
         status.user = true;
       }
     } catch (error) {

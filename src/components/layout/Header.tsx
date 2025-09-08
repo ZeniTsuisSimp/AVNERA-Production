@@ -71,7 +71,9 @@ const Header = () => {
               priority
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling.style.display = 'block';
+                if (e.currentTarget.nextElementSibling) {
+                  (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
+                }
               }}
             />
             <span className="brand-logo" style={{ display: 'none' }}>AVNERA</span>

@@ -375,27 +375,27 @@ export class ProductService {
   /**
    * Update product
    */
-static async updateProduct(productId: UUID, updates: UpdateProduct): Promise<Product> {
-  if (!supabaseProducts) {
-    throw new Error('Products database not configured');
+  static async updateProduct(productId: UUID, updates: any): Promise<Product> {
+    if (!supabaseProducts) {
+      throw new Error('Products database not configured');
+    }
+
+    try {
+      const { data, error } = await supabaseProducts
+        .from('products')
+        .update(updates as never) // ✅ FIXED — cast to `never`
+        .eq('id', productId)
+        .select('*') // ✅ Explicit selection
+        .single();
+
+      if (error) throw error;
+
+      return data as Product; // ✅ Type assertion for return
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw new DatabaseError(`Failed to update product: ${getErrorMessage(error)}`);
+    }
   }
-
-  try {
-    const { data, error } = await supabaseProducts
-      .from('products')
-      .update(updates as any) // ✅ FIXED — cast to `any`
-      .eq('id', productId)
-      .select('*') // ✅ Explicit selection
-      .single();
-
-    if (error) throw error;
-
-    return data as Product; // ✅ Type assertion for return
-  } catch (error) {
-    console.error('Error updating product:', error);
-    throw new DatabaseError(`Failed to update product: ${getErrorMessage(error)}`);
-  }
-}
 
   /**
    * Update product stock
@@ -408,7 +408,7 @@ static async updateProduct(productId: UUID, updates: UpdateProduct): Promise<Pro
     try {
       const { data, error } = await supabaseProducts
         .from('products')
-        .update({ stock_quantity: quantity } as Record<string, any>)
+        .update({ stock_quantity: quantity } as never)
         .eq('id', productId)
         .select()
         .single();
@@ -582,7 +582,7 @@ export class CategoryService {
     try {
       const { data, error } = await supabaseProducts
         .from('categories')
-        .insert([categoryData]) // ✅ FIXED: Wrap in array
+        .insert([categoryData] as never) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -605,7 +605,7 @@ export class CategoryService {
     try {
       const { data, error } = await supabaseProducts
         .from('categories')
-        .update(updates as any)
+        .update(updates as never)
         .eq('id', categoryId)
         .select()
         .single();
@@ -676,7 +676,7 @@ export class CartService {
 
       const { data, error } = await supabaseProducts
         .from('shopping_cart')
-        .insert([cartData]) // ✅ FIXED: Wrap in array
+        .insert([cartData] as never) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -699,7 +699,7 @@ export class CartService {
     try {
       const { data, error } = await supabaseProducts
         .from('shopping_cart')
-        .update(updates as any)
+        .update(updates as never)
         .eq('id', cartItemId)
         .select()
         .single();
@@ -854,7 +854,7 @@ export class WishlistService {
     try {
       const { data, error } = await supabaseProducts
         .from('wishlists')
-        .insert([wishlistData]) // ✅ FIXED: Wrap in array
+        .insert([wishlistData] as never) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -967,7 +967,7 @@ export class ReviewService {
         .insert([{
           ...reviewData,
           is_approved: reviewData.is_approved ?? false
-        }]) // ✅ FIXED: Wrap in array
+        }] as never) // ✅ FIXED: Wrap in array
         .select()
         .single();
 
@@ -1024,26 +1024,4 @@ export class ProductsService {
 // EXPORT TYPES FOR EXTERNAL USE
 // =====================================================
 
-export type {
-  UUID,
-  ClerkUserId,
-  Product,
-  CreateProduct,
-  UpdateProduct,
-  ProductWithCategory,
-  Category,
-  CreateCategory,
-  UpdateCategory,
-  ShoppingCartItem,
-  CreateCartItem,
-  UpdateCartItem,
-  CartItemWithProduct,
-  WishlistItem,
-  CreateWishlistItem,
-  WishlistItemWithProduct,
-  ProductReview,
-  CreateProductReview,
-  ProductWithReviews,
-  QueryOptions,
-  ProductQueryFilters
-};
+// Types are exported individually above in their definitions

@@ -33,14 +33,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Add first two products to cart
     const cartItems = [];
     for (let i = 0; i < Math.min(2, products.length); i++) {
-      const product = products[i];
+      const product = products[i] as any;
       const { data: cartItem, error: cartError } = await productsClient
         .from('shopping_cart')
         .insert({
           user_id: userId,
           product_id: product.id,
           quantity: i + 1 // Add 1 of first product, 2 of second
-        })
+        } as any)
         .select()
         .single();
 

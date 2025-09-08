@@ -40,7 +40,7 @@ export class UserProfileService {
     }
 
     try {
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
@@ -54,7 +54,7 @@ export class UserProfileService {
       return data;
     } catch (error) {
       console.error('Error getting user profile:', error);
-      throw new DatabaseError(`Failed to get user profile: ${error.message}`);
+      throw new DatabaseError(`Failed to get user profile: ${getErrorMessage(error)}`);
     }
   }
 
@@ -67,7 +67,7 @@ export class UserProfileService {
     }
 
     try {
-      const { data, error } = await supabaseUserService
+      const { data, error } = await (supabaseUserService as any)
         .from('user_profiles')
         .insert(profileData as any)
         .select()
@@ -77,7 +77,7 @@ export class UserProfileService {
       return data;
     } catch (error) {
       console.error('Error creating user profile:', error);
-      throw new DatabaseError(`Failed to create user profile: ${error.message}`);
+      throw new DatabaseError(`Failed to create user profile: ${getErrorMessage(error)}`);
     }
   }
 
@@ -93,7 +93,7 @@ export class UserProfileService {
     }
 
     try {
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_profiles')
         .update(updates as Record<string, any>)
         .eq('id', userId)
@@ -104,7 +104,7 @@ export class UserProfileService {
       return data;
     } catch (error) {
       console.error('Error updating user profile:', error);
-      throw new DatabaseError(`Failed to update user profile: ${error.message}`);
+      throw new DatabaseError(`Failed to update user profile: ${getErrorMessage(error)}`);
     }
   }
 
@@ -117,7 +117,7 @@ export class UserProfileService {
     }
 
     try {
-      const { error } = await supabaseUserService
+      const { error } = await (supabaseUserService as any)
         .from('user_profiles')
         .delete()
         .eq('id', userId);
@@ -125,7 +125,7 @@ export class UserProfileService {
       if (error) throw error;
     } catch (error) {
       console.error('Error deleting user profile:', error);
-      throw new DatabaseError(`Failed to delete user profile: ${error.message}`);
+      throw new DatabaseError(`Failed to delete user profile: ${getErrorMessage(error)}`);
     }
   }
 }
@@ -144,7 +144,7 @@ export class UserAddressService {
     }
 
     try {
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_addresses')
         .select('*')
         .eq('user_id', userId)
@@ -155,7 +155,7 @@ export class UserAddressService {
       return data || [];
     } catch (error) {
       console.error('Error getting user addresses:', error);
-      throw new DatabaseError(`Failed to get user addresses: ${error.message}`);
+      throw new DatabaseError(`Failed to get user addresses: ${getErrorMessage(error)}`);
     }
   }
 
@@ -168,7 +168,7 @@ export class UserAddressService {
     }
 
     try {
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_addresses')
         .select('*')
         .eq('user_id', userId)
@@ -183,7 +183,7 @@ export class UserAddressService {
       return data;
     } catch (error) {
       console.error('Error getting default address:', error);
-      throw new DatabaseError(`Failed to get default address: ${error.message}`);
+      throw new DatabaseError(`Failed to get default address: ${getErrorMessage(error)}`);
     }
   }
 
@@ -196,7 +196,7 @@ export class UserAddressService {
     }
 
     try {
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_addresses')
         .select('*')
         .eq('id', addressId)
@@ -210,7 +210,7 @@ export class UserAddressService {
       return data;
     } catch (error) {
       console.error('Error getting address:', error);
-      throw new DatabaseError(`Failed to get address: ${error.message}`);
+      throw new DatabaseError(`Failed to get address: ${getErrorMessage(error)}`);
     }
   }
 
@@ -228,7 +228,7 @@ export class UserAddressService {
         await this.unsetDefaultAddresses(addressData.user_id);
       }
 
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_addresses')
         .insert(addressData as any)
         .select()
@@ -238,7 +238,7 @@ export class UserAddressService {
       return data;
     } catch (error) {
       console.error('Error creating address:', error);
-      throw new DatabaseError(`Failed to create address: ${error.message}`);
+      throw new DatabaseError(`Failed to create address: ${getErrorMessage(error)}`);
     }
   }
 
@@ -262,7 +262,7 @@ export class UserAddressService {
         }
       }
 
-      const { data, error } = await supabaseUser
+      const { data, error } = await (supabaseUser as any)
         .from('user_addresses')
         .update(updates as Record<string, any>)
         .eq('id', addressId)
@@ -273,7 +273,7 @@ export class UserAddressService {
       return data;
     } catch (error) {
       console.error('Error updating address:', error);
-      throw new DatabaseError(`Failed to update address: ${error.message}`);
+      throw new DatabaseError(`Failed to update address: ${getErrorMessage(error)}`);
     }
   }
 
@@ -286,7 +286,7 @@ export class UserAddressService {
     }
 
     try {
-      const { error } = await supabaseUser
+      const { error } = await (supabaseUser as any)
         .from('user_addresses')
         .delete()
         .eq('id', addressId);
@@ -294,7 +294,7 @@ export class UserAddressService {
       if (error) throw error;
     } catch (error) {
       console.error('Error deleting address:', error);
-      throw new DatabaseError(`Failed to delete address: ${error.message}`);
+      throw new DatabaseError(`Failed to delete address: ${getErrorMessage(error)}`);
     }
   }
 
@@ -321,7 +321,7 @@ export class UserAddressService {
     if (!supabaseUser) return;
 
     try {
-      await supabaseUser
+      await (supabaseUser as any)
         .from('user_addresses')
         .update({ is_default: false } as Record<string, any>)
         .eq('user_id', userId)

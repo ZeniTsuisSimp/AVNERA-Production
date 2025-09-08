@@ -20,7 +20,7 @@ export class AddressesController {
       
       const userId = user.id;
 
-      const { data: addresses, error: addressError } = await supabaseUser
+      const { data: addresses, error: addressError } = await (supabaseUser as any)
         .from('user_addresses')
         .select('*')
         .eq('user_id', userId)
@@ -70,7 +70,7 @@ export class AddressesController {
 
       // If this is being set as default, update other addresses first
       if (addressData.is_default) {
-        await supabaseUser
+        await (supabaseUser as any)
           .from('user_addresses')
           .update({ is_default: false })
           .eq('user_id', userId);
@@ -93,7 +93,7 @@ export class AddressesController {
         is_default: addressData.is_default || false
       };
 
-      const { data: address, error: addressError } = await supabaseUser
+      const { data: address, error: addressError } = await (supabaseUser as any)
         .from('user_addresses')
         .insert(newAddressData)
         .select()
@@ -136,7 +136,7 @@ export class AddressesController {
 
       // If this is being set as default, update other addresses first
       if (addressData.is_default) {
-        await supabaseUser
+        await (supabaseUser as any)
           .from('user_addresses')
           .update({ is_default: false })
           .eq('user_id', userId);
@@ -158,7 +158,7 @@ export class AddressesController {
         is_default: addressData.is_default || false
       };
 
-      const { data: address, error: addressError } = await supabaseUser
+      const { data: address, error: addressError } = await (supabaseUser as any)
         .from('user_addresses')
         .update(updateAddressData)
         .eq('id', addressId)
@@ -205,7 +205,7 @@ export class AddressesController {
       const userId = user.id;
 
       // Check if this is the default address
-      const { data: addressCheck } = await supabaseUser
+      const { data: addressCheck } = await (supabaseUser as any)
         .from('user_addresses')
         .select('is_default')
         .eq('id', addressId)
@@ -216,7 +216,7 @@ export class AddressesController {
         return { success: false, error: 'Cannot delete default address' };
       }
 
-      const { error: addressError } = await supabaseUser
+      const { error: addressError } = await (supabaseUser as any)
         .from('user_addresses')
         .delete()
         .eq('id', addressId)

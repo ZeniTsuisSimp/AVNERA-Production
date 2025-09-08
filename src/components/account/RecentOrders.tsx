@@ -163,7 +163,7 @@ const RecentOrders = () => {
                 </div>
                 
                 <Link
-                  href={`/account/orders`}
+                  href={`/account/orders/${order.id}`}
                   className="text-xs text-primary-gold hover:text-secondary-gold transition-colors"
                 >
                   View Details
